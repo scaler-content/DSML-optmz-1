@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimisation 1 post read</title>
+<style>
+  :root{
+    --orange:#F7941D;
+    --orange-dark:#D9700B;
+    --orange-light:#FFE6C9;
+    --gray-900:#1C1C1E;
+    --gray-800:#2B2B2D;
+    --gray-700:#3F3F42;
+    --gray-500:#6B6B6E;
+    --gray-300:#C9C9CC;
+    --gray-200:#E4E4E6;
+    --gray-100:#F2F2F3;
+    --gray-50:#FAFAFA;
+    --white:#FFFFFF;
+    --radius:14px;
+    --shadow:0 4px 20px rgba(0,0,0,0.08);
+    --shadow-lg:0 10px 40px rgba(0,0,0,0.12);
+    --maxw:860px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--gray-900);
+    background:var(--gray-50);
+    line-height:1.65;
+  }
+  h1,h2,h3,h4{font-family:inherit;font-weight:800;color:var(--gray-900);letter-spacing:-0.01em;}
+  p{margin:0 0 1em;}
+  a{color:var(--orange-dark);}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px;}
+
+  /* HERO */
+  .hero{
+    background:linear-gradient(135deg,var(--gray-900) 0%,var(--gray-800) 60%,var(--orange-dark) 140%);
+    color:var(--white);
+    padding:72px 20px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;right:-120px;top:-120px;width:340px;height:340px;
+    background:radial-gradient(circle,var(--orange) 0%,transparent 70%);
+    opacity:0.35;
+  }
+  .hero-inner{max-width:var(--maxw);margin:0 auto;position:relative;z-index:1;}
+  .eyebrow{
+    display:inline-block;text-transform:uppercase;letter-spacing:0.14em;
+    font-size:12px;font-weight:700;color:var(--orange);
+    background:rgba(247,148,29,0.12);border:1px solid rgba(247,148,29,0.4);
+    padding:6px 14px;border-radius:999px;margin-bottom:18px;
+  }
+  .hero h1{font-size:clamp(28px,4.4vw,42px);line-height:1.15;margin:0 0 14px;color:var(--white);}
+  .hero p.sub{font-size:17px;color:var(--gray-300);max-width:640px;margin:0;}
+
+  /* TOC */
+  .toc{
+    background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);
+    padding:22px 24px;margin:-32px auto 48px;max-width:var(--maxw);box-shadow:var(--shadow);
+    position:relative;z-index:2;
+  }
+  .toc h2{font-size:14px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-500);margin:0 0 12px;}
+  .toc ol{columns:2;column-gap:28px;margin:0;padding-left:18px;font-size:14.5px;}
+  .toc li{margin-bottom:7px;break-inside:avoid;}
+  .toc a{color:var(--gray-800);text-decoration:none;font-weight:600;}
+  .toc a:hover{color:var(--orange-dark);}
+  @media(max-width:560px){.toc ol{columns:1;}}
+
+  main{padding-bottom:80px;}
+  section.block{max-width:var(--maxw);margin:0 auto 56px;padding:0 20px;}
+  section.block h2{
+    font-size:26px;margin:0 0 18px;padding-bottom:10px;
+    border-bottom:3px solid var(--orange);display:inline-block;
+  }
+  section.block h3{font-size:19px;color:var(--orange-dark);margin:28px 0 10px;}
+  .lead{font-size:17.5px;color:var(--gray-700);}
+
+  .card{
+    background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);
+    padding:22px 24px;margin:18px 0;box-shadow:var(--shadow);
+  }
+  .callout{
+    border-left:4px solid var(--orange);background:var(--orange-light);
+    padding:16px 20px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--gray-800);
+  }
+  .callout strong{color:var(--orange-dark);}
+  .insight{
+    background:var(--gray-900);color:var(--white);border-radius:var(--radius);
+    padding:20px 24px;margin:18px 0;
+  }
+  .insight .tag{color:var(--orange);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+
+  figure{margin:20px 0;text-align:center;}
+  figure svg{max-width:100%;height:auto;}
+  figcaption{font-size:13px;color:var(--gray-500);margin-top:8px;}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--gray-200);}
+  th{background:var(--gray-100);color:var(--gray-700);font-weight:700;}
+
+  code,.formula{
+    font-family:'Cambria Math',Cambria,Georgia,serif;font-style:italic;
+    background:var(--gray-100);padding:2px 8px;border-radius:6px;color:var(--gray-900);
+  }
+  .formula-block{
+    background:var(--gray-900);color:var(--white);border-radius:12px;
+    padding:18px 22px;margin:18px 0;font-family:Cambria,Georgia,serif;font-size:18px;
+    text-align:center;overflow-x:auto;
+  }
+  .formula-block small{display:block;color:var(--gray-300);font-size:13px;margin-top:6px;font-style:normal;font-family:inherit;}
+
+  /* Accordion */
+  .accordion{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:16px 0;}
+  .acc-item + .acc-item{border-top:1px solid var(--gray-200);}
+  .acc-head{
+    width:100%;text-align:left;background:var(--white);border:none;cursor:pointer;
+    padding:16px 20px;font-weight:700;font-size:15.5px;display:flex;justify-content:space-between;align-items:center;
+    color:var(--gray-900);
+  }
+  .acc-head:hover{background:var(--gray-50);}
+  .acc-head .plus{color:var(--orange-dark);font-size:20px;transition:transform .25s;}
+  .acc-item.open .plus{transform:rotate(45deg);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;background:var(--gray-50);}
+  .acc-body-inner{padding:4px 20px 18px;font-size:14.5px;color:var(--gray-700);}
+
+  /* Tabs */
+  .tabs{margin:18px 0;}
+  .tab-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .tab-btn{
+    border:1px solid var(--gray-200);background:var(--white);padding:9px 16px;border-radius:999px;
+    cursor:pointer;font-weight:700;font-size:13.5px;color:var(--gray-700);
+  }
+  .tab-btn.active{background:var(--orange);color:var(--white);border-color:var(--orange);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* Interactive: brute force calculator */
+  .sim-box{display:grid;grid-template-columns:1fr;gap:16px;}
+  .sim-controls{display:flex;flex-direction:column;gap:10px;}
+  .sim-controls label{font-weight:700;font-size:14px;color:var(--gray-800);}
+  input[type=range]{width:100%;accent-color:var(--orange);}
+  .sim-result{
+    background:var(--gray-900);color:var(--white);border-radius:12px;padding:18px;text-align:center;
+  }
+  .sim-result .big{font-size:30px;font-weight:800;color:var(--orange);}
+  .sim-result .small{font-size:13px;color:var(--gray-300);}
+
+  /* Vertical line test */
+  .vlt-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .vlt-btns{display:flex;gap:10px;}
+  .vlt-btn{
+    padding:8px 16px;border-radius:8px;border:2px solid var(--gray-200);background:var(--white);
+    cursor:pointer;font-weight:700;font-size:13.5px;
+  }
+  .vlt-btn.active{border-color:var(--orange);color:var(--orange-dark);background:var(--orange-light);}
+  .vlt-verdict{font-weight:700;font-size:15px;min-height:24px;}
+  .vlt-verdict.yes{color:#1a8a3f;}
+  .vlt-verdict.no{color:#C92A2A;}
+
+  /* Signum limit demo */
+  .limit-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .limit-readout{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;}
+  .limit-pill{background:var(--gray-100);border-radius:10px;padding:10px 18px;text-align:center;min-width:130px;}
+  .limit-pill .lbl{font-size:12px;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;}
+  .limit-pill .val{font-size:20px;font-weight:800;color:var(--orange-dark);}
+
+  footer{
+    background:var(--gray-900);color:var(--gray-300);text-align:center;
+    padding:30px 20px;font-size:13px;
+  }
+  footer strong{color:var(--white);}
+
+  ::selection{background:var(--orange-light);}
+  :focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">Optimisation Series · Part 1</span>
+    <h1>Optimisation 1 post read</h1>
+    <p class="sub">Why machine learning needs calculus: from brute-force line search to the first ideas behind gradient descent — classifiers, loss functions, and the mathematics of functions, limits, and continuity that make it all possible.</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Table of contents">
+  <h2>In this post</h2>
+  <ol>
+    <li><a href="#classifier">The intuition for a classifier</a></li>
+    <li><a href="#brute-force">Why brute-force search fails</a></li>
+    <li><a href="#gradient-intro">Introducing gradient descent</a></li>
+    <li><a href="#math-classification">Classification, formally</a></li>
+    <li><a href="#gain">Distance and the gain function</a></li>
+    <li><a href="#functions">What is a function?</a></li>
+    <li><a href="#limits">Limits and continuity</a></li>
+    <li><a href="#important-functions">Functions you'll meet again</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section class="block" id="classifier">
+  <h2>The intuition for a classifier</h2>
+  <p class="lead">Imagine a scatter of red and green points on a plane, and the task of drawing a single straight line that separates the two classes. There are infinitely many lines that could do this — so which one is "best"?</p>
+
+  <h3>Measuring how wrong a line is</h3>
+  <p>For any candidate line, we can count how many points it misclassifies. A perfect separating line misclassifies nothing, so its error is <code>0</code>. A line that puts a single red point on the wrong side, out of 100 total points, has an error of <code>1%</code>.</p>
+
+  <div class="formula-block">
+    error = (number of misclassified points ÷ total points) × 100
+  </div>
+
+  <p>Repeating this error calculation for every possible line produces an <strong>error curve</strong> — a plot where each point represents one candidate line, and its height represents that line's error.</p>
+
+  <div class="callout"><strong>Minimum error, best line.</strong> The line sitting at the lowest point of this error curve is the best separating line. This error function is also called the <strong>loss function</strong> or <strong>cost function</strong> — ideally it should reach <code>0</code>.</p></div>
+
+  <p>If we know the shape of this error function, the problem reduces to: find the input that makes the function smallest, then read off the corresponding line (in practice, the line's defining weight vector).</p>
+</section>
+
+<section class="block" id="brute-force">
+  <h2>Why brute-force search fails</h2>
+  <p class="lead">Without calculus, the obvious strategy is to try every candidate line one at a time — a <strong>linear search</strong> — and keep the one with the lowest error.</p>
+
+  <p>Suppose a line in 2 features is defined by weights <code>w₁</code>, <code>w₂</code>, and <code>w₀</code>, and each weight is tested from <code>−10</code> to <code>+10</code> in steps of <code>0.1</code>. That's <code>201</code> values per weight. With 3 weights, the total number of combinations is <code>201³</code>.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Try it: how long would brute force take?</h3>
+    <p style="margin-bottom:16px;">Each candidate is assumed to take <code>10⁻⁶</code> seconds to evaluate. Slide to add dimensions (weights) and watch the search time explode.</p>
+    <div class="sim-box">
+      <div class="sim-controls">
+        <label for="dimSlider">Number of weights being searched: <span id="dimVal">3</span></label>
+        <input type="range" id="dimSlider" min="3" max="7" step="1" value="3">
+      </div>
+      <div class="sim-result">
+        <div class="big" id="timeVal">≈ 8 seconds</div>
+        <div class="small" id="timeDetail">201³ combinations × 10⁻⁶ s each</div>
+      </div>
+    </div>
+  </div>
+
+  <p>At 3 weights the search finishes in about <strong>8 seconds</strong>. Add one dimension (a 3D plane instead of a 2D line) and it balloons to <strong>≈27 minutes</strong>. Add one more and it's <strong>≈91 hours</strong>. This exponential blow-up — and the fact that the right answer is only guaranteed if it happens to fall inside the tested range — makes brute force useless for real datasets with many features.</p>
+</section>
+
+<section class="block" id="gradient-intro">
+  <h2>Introducing gradient descent</h2>
+  <p class="lead">Gradient descent is the smarter alternative: instead of testing every possibility, it <em>searches</em> for an approximately correct solution by following the slope of the error function downhill.</p>
+
+  <p>To understand gradient descent properly, four concepts need to be built up from the ground up:</p>
+
+  <div class="accordion" id="syllabusAcc">
+    <div class="acc-item open">
+      <button class="acc-head" aria-expanded="true">Limits, continuity &amp; differentiability <span class="plus">+</span></button>
+      <div class="acc-body"><div class="acc-body-inner">The foundation: what it means for a function to behave predictably as its input changes, and when a slope can even be defined.</div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">Derivative, slope and tangent <span class="plus">+</span></button>
+      <div class="acc-body"><div class="acc-body-inner">Built on limits — the derivative measures the instantaneous rate of change of a function, visualised as the slope of a tangent line.</div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">Calculus in single-variable systems <span class="plus">+</span></button>
+      <div class="acc-body"><div class="acc-body-inner">Using derivatives to find where a one-input function is at its minimum or maximum.</div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">Calculus in multi-variable systems <span class="plus">+</span></button>
+      <div class="acc-body"><div class="acc-body-inner">Extending the same ideas to functions of many weights at once — exactly the setting a real classifier lives in.</div></div>
+    </div>
+  </div>
+  <p>These topics build bottom-up: basics first, advanced concepts after.</p>
+</section>
+
+<section class="block" id="math-classification">
+  <h2>Classification, formally</h2>
+  <p>A dataset with <code>d</code> features and a binary target is written as:</p>
+  <div class="formula-block">
+    D = { (xᵢ, yᵢ) : xᵢ ∈ ℝᵈ, yᵢ ∈ {1, −1} }ⁿᵢ₌₁
+  </div>
+
+  <p>The goal is to find a function <code>f(x)</code> that, given a feature vector <code>x̄</code>, predicts the class it belongs to. The predicted value is written <code>ŷᵢ</code> (or <code>yᵢ′</code>); ideally <code>ŷᵢ = yᵢ</code>, the true label.</p>
+
+  <p>One such classifier is the <strong>perceptron</strong>, which checks the sign of:</p>
+  <div class="formula-block">wᵢᵀx + w₀</div>
+  <p>to decide which half-space a point falls into.</p>
+</section>
+
+<section class="block" id="gain">
+  <h2>Distance and the gain function</h2>
+  <p class="lead">Rather than just counting errors, a richer measure rewards classifiers whose correctly-classified points sit <em>far</em> from the decision boundary — this is the <strong>gain function</strong>.</p>
+
+  <div class="formula-block">
+    g(x̄ᵢ, yᵢ, w̄, w₀) = ( (wᵀxᵢ + w₀) / ‖w‖ ) · yᵢ
+  </div>
+
+  <p>A high gain value means the classifier is good: most points sit far from the boundary. Since loss is the opposite of gain, a high gain corresponds to a low loss. The optimal parameters <code>w̄*</code> and <code>w₀*</code> are the ones that <strong>maximise</strong> the gain function over the whole dataset:</p>
+  <div class="formula-block">argmax<sub>w̄, w₀</sub> G(D, w̄, w₀)</div>
+  <p>Note that it is the <em>parameters</em> at the maximum we care about, not the maximum value itself.</p>
+
+  <h3>Why sum distances, not multiply them</h3>
+  <p>Given two candidate ways to combine per-point gains across the dataset — summing them, or multiplying them — summing is correct. Consider a point sitting exactly on the boundary line: its distance is <code>0</code>. If distances were multiplied, that single zero would collapse the entire product to zero regardless of how well every other point is classified. Summing avoids this flaw.</p>
+</section>
+
+<section class="block" id="functions">
+  <h2>What is a function?</h2>
+  <p class="lead">Writing <code>f(x) = y</code> describes <code>f(x)</code> as a mapping between an input <code>x</code> and an output <code>y</code>.</p>
+
+  <table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Domain</strong></td><td>All <code>x</code>-axis values the function is allowed to take (e.g. <code>log(x)</code> is undefined for negative numbers, so negative values are excluded from its domain).</td></tr>
+      <tr><td><strong>Range</strong></td><td>The collection of all possible outputs the function can produce.</td></tr>
+    </tbody>
+  </table>
+
+  <p>For <code>f(x) = x²</code> with inputs <code>{1, 2, 3}</code>, the domain is <code>{1, 2, 3}</code> and the range is <code>{1, 4, 9}</code>.</p>
+
+  <div class="callout"><strong>The one rule that defines a function:</strong> for a single value of <code>x</code> there must be only a single value of <code>y</code>. Multiple inputs can share the same output, but one input can never map to multiple outputs. (This is why the equation of a circle is not a function — in ML terms, it's described instead as a non-linear boundary.)</div>
+
+  <h3>Try it: is this curve a function?</h3>
+  <div class="card">
+    <div class="vlt-wrap">
+      <p style="margin:0;">A curve passes the <strong>vertical line test</strong> — is a function — only if every vertical line crosses it at most once.</p>
+      <div class="vlt-btns">
+        <button class="vlt-btn active" data-shape="parabola">Parabola (y = x²)</button>
+        <button class="vlt-btn" data-shape="circle">Circle</button>
+        <button class="vlt-btn" data-shape="wave">Sideways S-curve</button>
+      </div>
+      <figure>
+        <svg id="vltSvg" viewBox="0 0 320 220" width="320" height="220" role="img" aria-label="Vertical line test diagram"></svg>
+      </figure>
+      <div class="vlt-verdict" id="vltVerdict"></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="limits">
+  <h2>Limits and continuity</h2>
+  <p class="lead">Functions come in two broad types: <strong>continuous</strong> functions, which can be drawn without lifting the pen from the paper, and <strong>discontinuous</strong> functions, which cannot.</p>
+
+  <h3>Approaching from left and right</h3>
+  <p>Take the discontinuous <strong>signum function</strong> — it outputs <code>+1</code> for positive inputs, <code>−1</code> for negative inputs, and <code>0</code> at exactly zero. Two new ideas come from inspecting its behaviour near <code>x = 0</code>:</p>
+  <ul>
+    <li><strong>Right-hand limit</strong> — the value the function approaches as <code>x</code> approaches <code>0</code> from the positive side. For signum, this tends to <code>1</code>.</li>
+    <li><strong>Left-hand limit</strong> — the value approached from the negative side. For signum, this tends to <code>−1</code>.</li>
+  </ul>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Explore: approaching x = 0 on the signum function</h3>
+    <div class="limit-wrap">
+      <figure>
+        <svg id="signumSvg" viewBox="0 0 320 180" width="320" height="180" role="img" aria-label="Signum function with approach markers"></svg>
+      </figure>
+      <input type="range" id="signumSlider" min="-100" max="100" value="60" style="width:280px;">
+      <div class="limit-readout">
+        <div class="limit-pill"><div class="lbl">x value</div><div class="val" id="signumX">0.60</div></div>
+        <div class="limit-pill"><div class="lbl">f(x)</div><div class="val" id="signumY">1</div></div>
+      </div>
+      <p style="font-size:13.5px;color:var(--gray-500);margin:0;">Drag the slider to move the point toward <code>x = 0</code> from either side and watch <code>f(x)</code> settle at <code>+1</code> or <code>−1</code>.</p>
+    </div>
+  </div>
+
+  <h3>Continuous functions behave differently</h3>
+  <p>For <code>f(x) = x²</code> at <code>x = 3</code>: as <code>x</code> approaches <code>3</code> from the positive side (e.g. <code>x = 3.0000001</code>), <code>f(x)</code> tends to <code>9.0000006</code> — essentially <code>9</code>. Approaching from the negative side (e.g. <code>x = 2.9999999</code>) gives <code>f(x) ≈ 8.9999994</code> — also essentially <code>9</code>. Both sides agree.</p>
+
+  <div class="insight">
+    <div class="tag">Definition</div>
+    <p style="margin:8px 0 0;color:var(--white);">A function is <strong>continuous</strong> at a point when: <em>left-hand limit = right-hand limit = f(x) at that point.</em> Approaching from either side must land on the same value. A function is continuous overall when this holds at every valid <code>x</code>.</p>
+  </div>
+</section>
+
+<section class="block" id="important-functions">
+  <h2>Functions you'll meet again</h2>
+  <p class="lead">A handful of functions recur constantly throughout machine learning and deep learning. For each, it's worth knowing its domain, its range, and whether it is continuous or discontinuous.</p>
+
+  <div class="tabs" id="funcTabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" data-tab="linear">Linear</button>
+      <button class="tab-btn" data-tab="quadratic">Quadratic</button>
+      <button class="tab-btn" data-tab="abs">Absolute value</button>
+      <button class="tab-btn" data-tab="step">Step / Signum</button>
+      <button class="tab-btn" data-tab="log">Logarithm</button>
+      <button class="tab-btn" data-tab="exp">Exponential</button>
+    </div>
+
+    <div class="tab-panel active" data-panel="linear">
+      <div class="card"><strong>f(x) = ax + b</strong><br>Domain: all real numbers. Range: all real numbers. <strong>Continuous</strong> everywhere — a straight line.</div>
+    </div>
+    <div class="tab-panel" data-panel="quadratic">
+      <div class="card"><strong>f(x) = x²</strong><br>Domain: all real numbers. Range: <code>y ≥ 0</code>. <strong>Continuous</strong> and differentiable everywhere.</div>
+    </div>
+    <div class="tab-panel" data-panel="abs">
+      <div class="card"><strong>f(x) = |x|</strong><br>Domain: all real numbers. Range: <code>y ≥ 0</code>. <strong>Continuous</strong> everywhere, but not differentiable at <code>x = 0</code> (a sharp corner — no single tangent exists there).</div>
+    </div>
+    <div class="tab-panel" data-panel="step">
+      <div class="card"><strong>Signum function</strong><br>Outputs <code>−1</code>, <code>0</code>, or <code>+1</code>. Domain: all real numbers. Range: <code>{−1, 0, 1}</code>. <strong>Discontinuous</strong> at <code>x = 0</code> — left and right limits disagree.</div>
+    </div>
+    <div class="tab-panel" data-panel="log">
+      <div class="card"><strong>f(x) = log(x)</strong><br>Domain: <code>x &gt; 0</code> only (undefined for zero and negative numbers). Range: all real numbers. <strong>Continuous</strong> across its domain.</div>
+    </div>
+    <div class="tab-panel" data-panel="exp">
+      <div class="card"><strong>f(x) = eˣ</strong><br>Domain: all real numbers. Range: <code>y &gt; 0</code>. <strong>Continuous</strong> everywhere.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>Optimisation 1 post read</footer>
+
+<script>
+// Accordion
+document.querySelectorAll('#syllabusAcc .acc-head').forEach(btn=>{
+  const item = btn.closest('.acc-item');
+  const body = item.querySelector('.acc-body');
+  function setState(open){
+    item.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open);
+    body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px';
+  }
+  setState(item.classList.contains('open'));
+  btn.addEventListener('click', ()=> setState(!item.classList.contains('open')));
+});
+
+// Brute force simulator
+const dimSlider = document.getElementById('dimSlider');
+const dimVal = document.getElementById('dimVal');
+const timeVal = document.getElementById('timeVal');
+const timeDetail = document.getElementById('timeDetail');
+function fmtTime(seconds){
+  if(seconds < 60) return seconds.toFixed(1) + ' seconds';
+  if(seconds < 3600) return (seconds/60).toFixed(1) + ' minutes';
+  if(seconds < 86400) return (seconds/3600).toFixed(1) + ' hours';
+  return (seconds/86400).toFixed(1) + ' days';
+}
+function updateSim(){
+  const dims = parseInt(dimSlider.value,10);
+  dimVal.textContent = dims;
+  const combos = Math.pow(201, dims);
+  const seconds = combos * 1e-6;
+  timeVal.textContent = '≈ ' + fmtTime(seconds);
+  timeDetail.textContent = '201^' + dims + ' combinations × 10⁻⁶ s each';
+}
+dimSlider.addEventListener('input', updateSim);
+updateSim();
+
+// Vertical line test
+const vltSvg = document.getElementById('vltSvg');
+const vltVerdict = document.getElementById('vltVerdict');
+const shapes = {
+  parabola: {
+    path:'M20,200 C80,30 240,30 300,200',
+    lineX:160, isFn:true
+  },
+  circle: {
+    path:'M160,30 A90,85 0 1 1 159.9,30', // circle approx
+    lineX:160, isFn:false, isCircle:true
+  },
+  wave: {
+    path:'M40,190 C40,40 280,180 280,30',
+    lineX:160, isFn:false
+  }
+};
+function drawVlt(key){
+  const s = shapes[key];
+  let svg = '<line x1="20" y1="110" x2="300" y2="110" stroke="#C9C9CC" stroke-width="1"/>'+
+            '<line x1="160" y1="10" x2="160" y2="210" stroke="#C9C9CC" stroke-width="1"/>';
+  if(s.isCircle){
+    svg += '<circle cx="160" cy="110" r="85" fill="none" stroke="#2B2B2D" stroke-width="3"/>';
+  } else {
+    svg += '<path d="'+s.path+'" fill="none" stroke="#2B2B2D" stroke-width="3"/>';
+  }
+  svg += '<line x1="'+s.lineX+'" y1="10" x2="'+s.lineX+'" y2="210" stroke="#F7941D" stroke-width="3" stroke-dasharray="6,5"/>';
+  // mark intersections
+  if(s.isCircle){
+    svg += '<circle cx="160" cy="25" r="5" fill="#F7941D"/><circle cx="160" cy="195" r="5" fill="#F7941D"/>';
+  } else if(key==='parabola'){
+    svg += '<circle cx="160" cy="51" r="5" fill="#F7941D"/>';
+  } else if(key==='wave'){
+    svg += '<circle cx="160" cy="112" r="5" fill="#F7941D"/>';
+  }
+  vltSvg.innerHTML = svg;
+  if(key==='circle'){
+    vltVerdict.textContent = 'Not a function — the vertical line crosses the curve twice.';
+    vltVerdict.className='vlt-verdict no';
+  } else {
+    vltVerdict.textContent = 'Valid function — every vertical line crosses the curve exactly once.';
+    vltVerdict.className='vlt-verdict yes';
+  }
+}
+document.querySelectorAll('.vlt-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.vlt-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    drawVlt(b.dataset.shape);
+  });
+});
+drawVlt('parabola');
+
+// Signum limit demo
+const signumSvg = document.getElementById('signumSvg');
+const signumSlider = document.getElementById('signumSlider');
+const signumX = document.getElementById('signumX');
+const signumY = document.getElementById('signumY');
+function drawSignum(xRaw){
+  const x = xRaw/100; // -1 to 1
+  const cx = 160 + x*130;
+  const y = x>=0 ? 1 : (x<0 ? -1 : 0);
+  const cy = y===1 ? 50 : (y===-1 ? 130 : 90);
+  let svg = '<line x1="20" y1="90" x2="300" y2="90" stroke="#C9C9CC" stroke-width="1"/>'+
+            '<line x1="160" y1="10" x2="160" y2="170" stroke="#C9C9CC" stroke-width="1"/>'+
+            '<line x1="20" y1="50" x2="155" y2="50" stroke="#2B2B2D" stroke-width="3"/>'+
+            '<circle cx="155" cy="50" r="4" fill="white" stroke="#2B2B2D" stroke-width="2"/>'+
+            '<line x1="165" y1="130" x2="300" y2="130" stroke="#2B2B2D" stroke-width="3"/>'+
+            '<circle cx="165" cy="130" r="4" fill="white" stroke="#2B2B2D" stroke-width="2"/>'+
+            '<circle cx="160" cy="90" r="4" fill="#2B2B2D"/>'+
+            '<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#F7941D"/>';
+  signumSvg.innerHTML = svg;
+  signumX.textContent = x.toFixed(2);
+  signumY.textContent = y;
+}
+signumSlider.addEventListener('input', e=> drawSignum(e.target.value));
+drawSignum(60);
+
+// Tabs
+document.querySelectorAll('#funcTabs .tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('#funcTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#funcTabs .tab-panel').forEach(p=>p.classList.toggle('active', p.dataset.panel===tab));
+  });
+});
+</script>
+</body>
+</html>
